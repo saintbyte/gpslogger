@@ -50,12 +50,22 @@ public class Files {
 
     }
 
-    public static void addToMediaDatabase(File file, String mimeType){
 
-        MediaScannerConnection.scanFile(AppSettings.getInstance(),
-                new String[]{file.getPath()},
-                new String[]{mimeType},
-                null);
+    static MediaScannerConnection msc = null;
+
+    public static void addToMediaDatabase(final File file, final String mimeType){
+        msc = new MediaScannerConnection(AppSettings.getInstance(), new MediaScannerConnection.MediaScannerConnectionClient() {
+            @Override
+            public void onMediaScannerConnected() {
+                msc.scanFile(file.getAbsolutePath(), mimeType);
+            }
+
+            @Override
+            public void onScanCompleted(String s, Uri uri) {
+                msc.disconnect();
+            }
+        });
+        msc.connect();
     }
 
     public static File[] fromFolder(File folder) {
